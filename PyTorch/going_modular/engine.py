@@ -8,6 +8,10 @@ import torch
 from tqdm.auto import tqdm
 from typing import Dict,List, Tuple
 from timeit import default_timer as timer
+from torch import nn
+
+#setup the device
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train_step(model:torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
@@ -63,7 +67,7 @@ def train_step(model:torch.nn.Module,
 
     y_pred_class = torch.argmax(torch.softmax(y_logits , dim = 1), dim = 1)
     #calculate the accuracy
-    total_accuracy += (y_pred_class == y).sum().item()/ len(y_logits)
+    train_accuracy += (y_pred_class == y).sum().item()/ len(y_logits)
 
 
   #calculate accuracy per batch
@@ -131,8 +135,8 @@ def train(model:torch.nn.Module,
           test_dataloader: torch.utils.data.DataLoader,
           optimizer: torch.optim.Optimizer,
           EPOCHS: int,
-          loss: nn.Module = nn.CrossEntropyLoss(),
-          device: torch.device =device):
+          loss_fn: nn.Module = nn.CrossEntropyLoss(),
+          device: torch.device = device):
 
   """Trains and tests a PyTorch model.
 
@@ -194,9 +198,9 @@ def train(model:torch.nn.Module,
       print(
           f"Epoch: {epoch+1} | "
           f"train_loss: {train_loss:.4f} | "
-          f"train_acc: {train_acc:.4f} | "
+          f"train_acc: {train_accuracy:.4f} | "
           f"test_loss: {test_loss:.4f} | "
-          f"test_acc: {test_acc:.4f}"
+          f"test_acc: {test_accuracy:.4f}"
       )
 
       #append the results
