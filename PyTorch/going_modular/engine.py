@@ -82,21 +82,21 @@ def test_step(model: torch.nn.Module,
               device: torch.device = device) ->Tuple[float, float]:
   """Tests a PyTorch model for a single epoch.
 
-  Turns a target PyTorch model to "eval" mode and then performs
-  a forward pass on a testing dataset.
+    Turns a target PyTorch model to "eval" mode and then performs
+    a forward pass on a testing dataset.
 
-  Args:
-    model: A PyTorch model to be tested.
-    dataloader: A DataLoader instance for the model to be tested on.
-    loss_fn: A PyTorch loss function to calculate loss on the test data.
-    device: A target device to compute on (e.g. "cuda" or "cpu").
+    Args:
+      model: A PyTorch model to be tested.
+      dataloader: A DataLoader instance for the model to be tested on.
+      loss_fn: A PyTorch loss function to calculate loss on the test data.
+      device: A target device to compute on (e.g. "cuda" or "cpu").
 
-  Returns:
-    A tuple of testing loss and testing accuracy metrics.
-    In the form (test_loss, test_accuracy). For example:
+    Returns:
+      A tuple of testing loss and testing accuracy metrics.
+      In the form (test_loss, test_accuracy). For example:
 
-    (0.0223, 0.8985)
-  """
+      (0.0223, 0.8985)
+    """
   #set the model in eval mode
   model.eval()
 
@@ -117,15 +117,15 @@ def test_step(model: torch.nn.Module,
 
       #2. calculate the loss
       loss = loss_fn(y_pred, y)
-      test_loss += loss
+      test_loss += loss.item()
 
       #calculate the accuracy
       test_pred_class = torch.softmax(y_pred, dim = 1).argmax(dim = 1)
       test_accuracy += (test_pred_class == y).sum().item() / len(y_pred)
 
   #calculate the loss and accuracy per batch
-  test_loss /= len(dataloader)
-  test_accuracy /= len(dataloader)
+  test_loss = test_loss / len(dataloader)
+  test_accuracy = test_accuracy / len(dataloader)
 
   return test_loss, test_accuracy
 
