@@ -4,7 +4,7 @@ import fire
 
 from Paligemma_processor import PaliGemmaProcessor
 from modeling_gemma import KVCache, PaliGemmaForConditionalGeneration
-from utils import load_hf_model
+from utils import load_hf_model, load_hf_model_weights
 
 
 def move_inputs_to_device(model_inputs: dict, device: str):
@@ -122,7 +122,7 @@ def main(
     print("Device in use: ", device)
 
     print("Loading model")
-    model, tokenizer = load_hf_model(model_path, device)
+    model, tokenizer = load_hf_model_weights(model_path, device)
     model = model.to(device).eval()
 
     num_image_tokens = model.config.vision_config.num_image_tokens

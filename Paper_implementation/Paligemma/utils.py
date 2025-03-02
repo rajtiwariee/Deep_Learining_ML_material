@@ -6,7 +6,7 @@ from safetensors import safe_open
 from typing import Tuple
 import os
 from transformers import AutoModel, AutoConfig
-
+from transformers import PaliGemmaForConditionalGeneration as palimodel
 def load_hf_model(model_path: str, device: str) -> Tuple[PaliGemmaForConditionalGeneration, AutoTokenizer]:
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side="right")
@@ -46,7 +46,7 @@ def load_hf_model_weights(model_name: str, device: str) -> Tuple[PaliGemmaForCon
     assert tokenizer.padding_side == "right"
     
     # Load the model
-    hf_model = AutoModel.from_pretrained(model_name).to(device)
+    hf_model = palimodel.from_pretrained(model_name).to(device)
     #save the weights
     # Get Hugging Face state dict (weights)
     hf_state_dict = hf_model.state_dict()

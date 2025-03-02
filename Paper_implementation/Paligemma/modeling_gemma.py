@@ -174,12 +174,14 @@ def apply_rotatory_pos_emb(q,k,cos,sin, unsqueeze_dim = 1):
 class GemmaAttention(nn.Module):
 
   def __init__(self, config: GemmaConfig, layer_idx: Optional[int] = None):
+    super().__init__()
+    
     self.config = config
     self.layer_idx = layer_idx
 
     self.attention_dropout = config.attention_dropout
     self.hidden_size = config.hidden_size
-    self.num_heads = config.num_heads
+    self.num_heads = config.num_attention_heads
     self.head_dim = config.head_dim
     self.num_key_value_heads = config.num_key_value_heads
     self.num_key_value_groups = self.num_heads // self.num_key_value_heads
