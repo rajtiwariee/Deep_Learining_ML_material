@@ -149,6 +149,12 @@ class PaliGemmaProcessor:
         )
 
         #here the addition happens [pixel_values, input_ids, attention_mask]
+        #{
+#     "pixel_values": tensor([[[[ 0.2941,  0.1765, ..., -0.7647],  ... ]]]),  # [1, 3, 224, 224]
+#     "input_ids": tensor([[50257, 50257, 50257, 0, 2064, 318, 262, 2472, 30]]),  # [1, seq_len]
+#     "attention_mask": tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1]])  # [1, seq_len]
+# }
+
         return_data = {"pixel_values": pixel_values, **inputs} 
 
         return return_data

@@ -194,9 +194,9 @@ class GemmaAttention(nn.Module):
     #Number of heads = 8
     #Hidden_Size = 1024
     # Head_dim = 1024/8 = 128
-    #Wq = [1024, 8*1024] = [1024,1024]
-    #Wk = [1024, 4 *128] = [1024,256]
-    #Wv = [1024, 4*128] = [1024,256]
+    #Wq = [1024, 8*128] = [1024,1024]
+    #Wk = [1024, 4 *128] = [1024,512]
+    #Wv = [1024, 4*128] = [1024,512]
     #this technique is known as grouped query attention
     #where suppose for two query heads there will be one key head
     #In multi-query you have only one head in key and one in value
@@ -380,11 +380,13 @@ class GemmaModel(nn.Module):
 
     #padding_idx is used to make sure the length of the sentence is equal to all other sentence
     #to fit it with same length
+    #This padding_idx is not considered by the model thats why we put it into the embedding layer 
     self.embed_tokens= nn.Embedding(config.vocab_size, config.hidden_size, self.padding_idx)
     self.layers = nn.ModuleList(
         [GemmaDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
     )
 
+    
     self.norm = GemmaRMSNorm(config.hidden_size, eps = config.rms_norm_eps)
 
   def get_input_embeddings(self):
@@ -550,7 +552,7 @@ class PaliGemmaForConditionalGeneration(nn.Module):
     image_mask = input_ids == self.config.image_token_index
     #[1,1,1,1,1,1,0,0,0,0,0,0,0]
     #shape: [batch_size, seq_len]. True for padding tokens
-    pad_mask = input_ids = self.pad_token_id
+    pad_mask = input_ids == self.pad_token_id
     #[0,0,0,0,0,0,0,0]
 
     #we need to expand the masks to the embedding dimension otherwise we cant use them in torch.where
@@ -571,6 +573,8 @@ class PaliGemmaForConditionalGeneration(nn.Module):
     min_dtype = torch.finfo(dtype).min
     q_len = input_embeds.shape(1)
 
+    #so this part is when we are passing the text and image embedding first time to the model 
+    #then we dont need to mask out anything because we are just passing the embeddings and we wont have any cache
     if kv_cache is None or kv_cache.num_items() == 0:
       #Do not mask any token because we're in the prefill phase
       #This only works when we have no padding
@@ -579,6 +583,7 @@ class PaliGemmaForConditionalGeneration(nn.Module):
       )
     else:
       #since we are generating tokens, the query must be one single token
+      #you would have the other tokens in the kv_cache
       assert q_len == 1
       kv_len = kv_cache.num_items()+ q_len
       #Also in this case we don't need to mask anything , since each query should be able to attend all previous
@@ -628,9 +633,11 @@ class PaliGemmaForConditionalGeneration(nn.Module):
 
     #2. Merge text and images
     #[Batch_size, channels , height, width] -> [batch_size, NUM_PATCHES, EMBED_DIM]
-    selected_image_features = self.vision_tower(pixel_values.to(input_embeds.dtype))
+    #contexualized image embeddings is generated after we pass the image through the vision tower
+    selected_image_features = self.vision_tower(pixel_values.to(input_embeds.dtype)) 
     #we make the image embeddings to the same size of the language model
     #Linear Projector(Linear layer)
+    #Here the contexualized embedding of the image is made equal to the size thats needed by the language model
     image_features = self.multi_modal_projection(selected_image_features)
 
 

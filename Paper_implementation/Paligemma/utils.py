@@ -7,6 +7,11 @@ from typing import Tuple
 import os
 from transformers import AutoModel, AutoConfig
 from transformers import PaliGemmaForConditionalGeneration as palimodel
+from huggingface_hub import login
+from dotenv import load_dotenv
+load_dotenv()
+login(token=os.environ.get("HUGGING_FACE_TOKEN"))
+
 def load_hf_model(model_path: str, device: str) -> Tuple[PaliGemmaForConditionalGeneration, AutoTokenizer]:
     # Load the tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path, padding_side="right")
