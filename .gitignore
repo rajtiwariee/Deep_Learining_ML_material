@@ -1,0 +1,4 @@
+.env
+wandb
+GPT2_124M/input.txt
+__pycache__
